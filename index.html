@@ -3,86 +3,33 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Berita Monitor Auto Live</title>
+<title>Berita Monitor — Playlist</title>
 <style>
-*{box-sizing:border-box}
-html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#050505;font-family:Arial,sans-serif}
-.grid{display:grid;grid-template-columns:1fr 1fr;grid-template-rows:1fr 1fr;width:100vw;height:100vh;gap:3px;background:#07111f}
-.tile{position:relative;background:#000;overflow:hidden}
-.tile iframe{position:absolute;inset:0;width:100%;height:100%;border:0}
-.badge{position:absolute;z-index:5;top:8px;left:8px;background:rgba(0,0,0,.82);color:#fff;padding:7px 10px;border-radius:6px;font-weight:700}
-.dot{color:#ff3030}
-.state{font-size:11px;color:#aaa;margin-left:5px;font-weight:400}
-.toolbar{position:fixed;right:10px;bottom:10px;z-index:20}
-button{background:#111827;color:#fff;border:0;border-radius:7px;padding:9px 12px;cursor:pointer}
-.panel{display:none;position:fixed;right:10px;top:10px;z-index:30;width:390px;background:#111827;color:#fff;border:1px solid #374151;border-radius:10px;padding:14px}
-.panel.show{display:block}
-input{width:100%;padding:10px;background:#0b1220;color:#fff;border:1px solid #475569;border-radius:6px}
+*{box-sizing:border-box}html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#050505;font-family:Arial,sans-serif}
+.grid{width:100vw;height:100vh;display:grid;grid-template-columns:1fr 1fr;grid-template-rows:1fr 1fr;gap:3px;background:#07111f}
+.tile{position:relative;background:#000}.tile iframe{position:absolute;inset:0;width:100%;height:100%;border:0}
+.label{position:absolute;z-index:5;top:8px;left:8px;background:#000d;color:#fff;padding:7px 10px;border-radius:6px;font-weight:bold;pointer-events:none}
+@media(max-width:800px){.grid{grid-template-columns:1fr;grid-template-rows:repeat(4,1fr)}}
 </style>
 </head>
 <body>
 <div class="grid">
-<div class="tile"><div class="badge"><span class="dot">●</span> TV One <span id="s-tvone" class="state">cek…</span></div><iframe id="tvone" allow="autoplay; encrypted-media; picture-in-picture" allowfullscreen></iframe></div>
-<div class="tile"><div class="badge"><span class="dot">●</span> Metro TV <span id="s-metro" class="state">cek…</span></div><iframe id="metro" allow="autoplay; encrypted-media; picture-in-picture" allowfullscreen></iframe></div>
-<div class="tile"><div class="badge"><span class="dot">●</span> Kompas TV <span id="s-kompas" class="state">cek…</span></div><iframe id="kompas" allow="autoplay; encrypted-media; picture-in-picture" allowfullscreen></iframe></div>
-<div class="tile"><div class="badge"><span class="dot">●</span> CNN Indonesia <span id="s-cnn" class="state">cek…</span></div><iframe id="cnn" allow="autoplay; encrypted-media; picture-in-picture" allowfullscreen></iframe></div>
+  <div class="tile">
+    <div class="label">TV One</div>
+    <iframe src="https://www.youtube.com/embed?listType=user_uploads&list=tvOneNews&autoplay=1&mute=1&playsinline=1&rel=0" allow="autoplay; encrypted-media; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
+  </div>
+  <div class="tile">
+    <div class="label">Metro TV</div>
+    <iframe src="https://www.youtube.com/embed?listType=user_uploads&list=METROTV&autoplay=1&mute=1&playsinline=1&rel=0" allow="autoplay; encrypted-media; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
+  </div>
+  <div class="tile">
+    <div class="label">Kompas TV</div>
+    <iframe src="https://www.youtube.com/embed?listType=user_uploads&list=kompastv&autoplay=1&mute=1&playsinline=1&rel=0" allow="autoplay; encrypted-media; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
+  </div>
+  <div class="tile">
+    <div class="label">CNN Indonesia</div>
+    <iframe src="https://www.youtube.com/embed?listType=user_uploads&list=CNNIndonesia&autoplay=1&mute=1&playsinline=1&rel=0" allow="autoplay; encrypted-media; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
+  </div>
 </div>
-
-<div class="toolbar"><button onclick="toggleApi()">⚙ API</button> <button onclick="checkAll()">↻ Cek Live</button></div>
-
-<div id="panel" class="panel">
-<h3>YouTube Data API Key</h3>
-<p>Dipakai untuk mencari livestream terbaru secara otomatis.</p>
-<input id="apikey" type="password" placeholder="Masukkan API key">
-<p><button onclick="saveApi()">Simpan</button></p>
-</div>
-
-<script>
-const ORIGIN="https://nebengerspolsub.github.io";
-const CH={
- tvone:{handle:"@tvOneNews",fallback:"4K8vd0sBwL8"},
- metro:{handle:"@METROTV",fallback:"hjNOqYN6UJo"},
- kompas:{handle:"@kompastv",fallback:"DOOrIxw5xOw"},
- cnn:{handle:"@CNNIndonesia",fallback:"PDDOkUq33Sw"}
-};
-
-function setState(id,t){document.getElementById("s-"+id).textContent=t}
-function setVideo(id,v){document.getElementById(id).src="https://www.youtube.com/embed/"+v+"?autoplay=1&mute=1&playsinline=1&rel=0&origin="+encodeURIComponent(ORIGIN)}
-function fallback(){for(const [id,c] of Object.entries(CH)){setVideo(id,c.fallback);setState(id,"fallback")}}
-
-async function getChannel(handle,key){
- const u="https://www.googleapis.com/youtube/v3/channels?part=id&forHandle="+encodeURIComponent(handle)+"&key="+key;
- const j=await fetch(u).then(r=>r.json());
- return j.items?.[0]?.id;
-}
-async function getLive(cid,key){
- const u="https://www.googleapis.com/youtube/v3/search?part=id&channelId="+cid+"&eventType=live&type=video&maxResults=1&key="+key;
- const j=await fetch(u).then(r=>r.json());
- return j.items?.[0]?.id?.videoId;
-}
-async function checkAll(){
- const key=localStorage.getItem("ytkey");
- if(!key){fallback();return;}
- for(const [id,c] of Object.entries(CH)){
-  try{
-   setState(id,"mencari…");
-   const cid=await getChannel(c.handle,key);
-   const vid=await getLive(cid,key);
-   if(vid){setVideo(id,vid);setState(id,"LIVE")}
-   else{setState(id,"tidak live")}
-  }catch(e){setState(id,"gagal")}
- }
-}
-function toggleApi(){document.getElementById("panel").classList.toggle("show")}
-function saveApi(){
- const k=document.getElementById("apikey").value.trim();
- if(k)localStorage.setItem("ytkey",k);
- document.getElementById("panel").classList.remove("show");
- checkAll();
-}
-fallback();
-checkAll();
-setInterval(checkAll,300000);
-</script>
 </body>
 </html>
