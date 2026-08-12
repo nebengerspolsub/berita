@@ -1,88 +1,301 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="id">
 <head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Berita Live</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>BERITA V5</title>
 <style>
+:root{
+  --bg:#070b12;
+  --panel:#0d131d;
+  --line:#1c2a3b;
+  --text:#eef4ff;
+  --muted:#8d9bb0;
+  --red:#ff304f;
+  --green:#22c55e;
+  --yellow:#f59e0b;
+}
 *{box-sizing:border-box}
-html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#050505;font-family:Arial,sans-serif}
-.grid{display:grid;grid-template-columns:1fr 1fr;grid-template-rows:1fr 1fr;width:100vw;height:100vh;gap:3px;background:#07111f}
-.tile{position:relative;background:#000;overflow:hidden}
+html,body{margin:0;width:100%;height:100%;background:var(--bg);color:var(--text);font-family:Inter,Segoe UI,Arial,sans-serif}
+body{overflow:hidden}
+.app{height:100vh;display:flex;flex-direction:column}
+.topbar{
+  height:58px;flex:0 0 58px;display:flex;align-items:center;
+  justify-content:space-between;padding:0 14px;
+  background:#0a0f17;border-bottom:1px solid var(--line)
+}
+.brand{display:flex;align-items:center;gap:10px;font-weight:800;letter-spacing:.5px}
+.brand-mark{width:10px;height:10px;border-radius:50%;background:var(--red);box-shadow:0 0 14px #ff304f}
+.brand small{display:block;color:var(--muted);font-size:11px;font-weight:500;letter-spacing:0}
+.actions{display:flex;gap:8px}
+button{
+  border:1px solid #26364b;background:#111a26;color:var(--text);
+  padding:8px 11px;border-radius:7px;cursor:pointer;font-weight:700
+}
+button:hover{background:#182435}
+button.primary{background:#17311f;border-color:#245c36}
+button.primary:hover{background:#1d4328}
+.statusbar{
+  position:fixed;left:50%;top:58px;transform:translateX(-50%);
+  z-index:30;background:#101823dd;border:1px solid #25364b;
+  padding:5px 10px;border-radius:0 0 8px 8px;color:var(--muted);font-size:11px;
+  backdrop-filter:blur(8px);pointer-events:none
+}
+.grid{
+  flex:1;min-height:0;display:grid;grid-template-columns:1fr 1fr;
+  grid-template-rows:1fr 1fr;gap:2px;background:#02050a
+}
+.tile{position:relative;min-width:0;min-height:0;background:#000;overflow:hidden}
 .tile iframe{position:absolute;inset:0;width:100%;height:100%;border:0}
-.badge{position:absolute;z-index:5;top:8px;left:8px;background:rgba(0,0,0,.82);color:#fff;padding:7px 10px;border-radius:6px;font-weight:700}
-.dot{color:#ff3030}
-.state{font-size:11px;color:#aaa;margin-left:5px;font-weight:400}
-.toolbar{position:fixed;right:10px;bottom:10px;z-index:20}
-button{background:#111827;color:#fff;border:0;border-radius:7px;padding:9px 12px;cursor:pointer}
-.panel{display:none;position:fixed;right:10px;top:10px;z-index:30;width:390px;background:#111827;color:#fff;border:1px solid #374151;border-radius:10px;padding:14px}
-.panel.show{display:block}
-input{width:100%;padding:10px;background:#0b1220;color:#fff;border:1px solid #475569;border-radius:6px}
+.tile-head{
+  position:absolute;z-index:10;left:9px;top:9px;display:flex;align-items:center;gap:8px;
+  background:#070b12e8;border:1px solid #263246;border-radius:7px;padding:6px 9px;
+  backdrop-filter:blur(8px);pointer-events:none
+}
+.live-dot{width:7px;height:7px;border-radius:50%;background:var(--red)}
+.channel{font-weight:800;font-size:13px}
+.state{font-size:10px;color:var(--muted);font-weight:600}
+.state.live{color:#86efac}.state.wait{color:#fcd34d}.state.err{color:#fca5a5}
+.tile-tools{
+  position:absolute;z-index:11;right:9px;top:9px;display:flex;gap:5px
+}
+.tile-tools button{font-size:11px;padding:5px 7px;background:#070b12d9}
+.overlay{
+  position:absolute;inset:0;z-index:8;display:flex;align-items:center;justify-content:center;
+  background:#000;pointer-events:none;opacity:1;transition:opacity .2s
+}
+.overlay.hidden{opacity:0}
+.overlay-box{text-align:center;color:#9aa8ba}
+.overlay-box strong{display:block;color:#e5edf8;margin-bottom:5px}
+.overlay-box span{font-size:12px}
+.modal-backdrop{
+  display:none;position:fixed;inset:0;z-index:100;background:#0009;backdrop-filter:blur(5px)
+}
+.modal-backdrop.show{display:flex;align-items:center;justify-content:center}
+.modal{
+  width:min(520px,calc(100vw - 28px));background:#0d131d;border:1px solid #26364b;
+  border-radius:12px;padding:18px;box-shadow:0 25px 80px #000
+}
+.modal h2{margin:0 0 6px;font-size:19px}.modal p{color:var(--muted);font-size:12px;line-height:1.5}
+.modal input{
+  width:100%;padding:11px;border-radius:7px;border:1px solid #304158;
+  background:#070b12;color:#fff;outline:none
+}
+.modal input:focus{border-color:#4c6b91}
+.modal-actions{display:flex;justify-content:flex-end;gap:8px;margin-top:13px}
+.note{font-size:11px!important}
+code{color:#c7d2fe}
+@media(max-width:800px){
+  body{overflow:auto}.app{height:auto;min-height:100vh}
+  .topbar{height:54px}.grid{height:calc(100vh - 54px);grid-template-columns:1fr;grid-template-rows:repeat(4,1fr)}
+}
 </style>
 </head>
 <body>
-<div class="grid">
-<div class="tile"><div class="badge"><span class="dot">●</span> TV One <span id="s-tvone" class="state">cek…</span></div><iframe id="tvone" allow="autoplay; encrypted-media; picture-in-picture" allowfullscreen></iframe></div>
-<div class="tile"><div class="badge"><span class="dot">●</span> Metro TV <span id="s-metro" class="state">cek…</span></div><iframe id="metro" allow="autoplay; encrypted-media; picture-in-picture" allowfullscreen></iframe></div>
-<div class="tile"><div class="badge"><span class="dot">●</span> Kompas TV <span id="s-kompas" class="state">cek…</span></div><iframe id="kompas" allow="autoplay; encrypted-media; picture-in-picture" allowfullscreen></iframe></div>
-<div class="tile"><div class="badge"><span class="dot">●</span> CNN Indonesia <span id="s-cnn" class="state">cek…</span></div><iframe id="cnn" allow="autoplay; encrypted-media; picture-in-picture" allowfullscreen></iframe></div>
+<div class="app">
+  <header class="topbar">
+    <div class="brand">
+      <span class="brand-mark"></span>
+      <div>BERITA MONITOR <small>AUTO LIVE • 4 CHANNEL</small></div>
+    </div>
+    <div class="actions">
+      <button id="refreshBtn" class="primary">↻ Cek Live</button>
+      <button id="apiBtn">⚙ API</button>
+    </div>
+  </header>
+
+  <div id="statusbar" class="statusbar">Memulai pemeriksaan…</div>
+
+  <main class="grid">
+    <section class="tile" id="tile-tvone">
+      <div class="tile-head"><span class="live-dot"></span><span class="channel">TV One</span><span class="state" id="state-tvone">menunggu</span></div>
+      <div class="tile-tools"><button onclick="fullscreenTile('tile-tvone')">⛶</button></div>
+      <div class="overlay" id="overlay-tvone"><div class="overlay-box"><strong>Mencari livestream TV One…</strong><span>Menunggu hasil YouTube Data API</span></div></div>
+      <iframe id="frame-tvone" allow="autoplay; encrypted-media; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
+    </section>
+
+    <section class="tile" id="tile-metro">
+      <div class="tile-head"><span class="live-dot"></span><span class="channel">Metro TV</span><span class="state" id="state-metro">menunggu</span></div>
+      <div class="tile-tools"><button onclick="fullscreenTile('tile-metro')">⛶</button></div>
+      <div class="overlay" id="overlay-metro"><div class="overlay-box"><strong>Mencari livestream Metro TV…</strong><span>Menunggu hasil YouTube Data API</span></div></div>
+      <iframe id="frame-metro" allow="autoplay; encrypted-media; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
+    </section>
+
+    <section class="tile" id="tile-kompas">
+      <div class="tile-head"><span class="live-dot"></span><span class="channel">Kompas TV</span><span class="state" id="state-kompas">menunggu</span></div>
+      <div class="tile-tools"><button onclick="fullscreenTile('tile-kompas')">⛶</button></div>
+      <div class="overlay" id="overlay-kompas"><div class="overlay-box"><strong>Mencari livestream Kompas TV…</strong><span>Menunggu hasil YouTube Data API</span></div></div>
+      <iframe id="frame-kompas" allow="autoplay; encrypted-media; picture-in-picture; web-share" allowfullscreen></iframe>
+    </section>
+
+    <section class="tile" id="tile-cnn">
+      <div class="tile-head"><span class="live-dot"></span><span class="channel">CNN Indonesia</span><span class="state" id="state-cnn">menunggu</span></div>
+      <div class="tile-tools"><button onclick="fullscreenTile('tile-cnn')">⛶</button></div>
+      <div class="overlay" id="overlay-cnn"><div class="overlay-box"><strong>Mencari livestream CNN Indonesia…</strong><span>Menunggu hasil YouTube Data API</span></div></div>
+      <iframe id="frame-cnn" allow="autoplay; encrypted-media; picture-in-picture; web-share" allowfullscreen></iframe>
+    </section>
+  </main>
 </div>
 
-<div class="toolbar"><button onclick="toggleApi()">⚙ API</button> <button onclick="checkAll()">↻ Cek Live</button></div>
-
-<div id="panel" class="panel">
-<h3>YouTube Data API Key</h3>
-<p>Dipakai untuk mencari livestream terbaru secara otomatis.</p>
-<input id="apikey" type="password" placeholder="Masukkan API key">
-<p><button onclick="saveApi()">Simpan</button></p>
+<div id="modalBackdrop" class="modal-backdrop">
+  <div class="modal">
+    <h2>YouTube Data API</h2>
+    <p>API key disimpan hanya di <code>localStorage</code> browser ini. Untuk keamanan, batasi key di Google Cloud ke <b>YouTube Data API v3</b> dan referrer <code>https://nebengerspolsub.github.io/berita/*</code>.</p>
+    <input id="apiInput" type="password" autocomplete="off" placeholder="AIzaSy…">
+    <p class="note">Jangan masukkan Video ID seperti <code>rQJoEpzKkNk</code> di sini. Itu adalah Video ID, bukan API key.</p>
+    <div class="modal-actions">
+      <button onclick="closeApi()">Batal</button>
+      <button onclick="clearApi()">Hapus key</button>
+      <button class="primary" onclick="saveApi()">Simpan & Cek</button>
+    </div>
+  </div>
 </div>
 
 <script>
-const ORIGIN="https://nebengerspolsub.github.io";
-const CH={
- tvone:{handle:"@tvOneNews",fallback:"4K8vd0sBwL8"},
- metro:{handle:"@METROTV",fallback:"hjNOqYN6UJo"},
- kompas:{handle:"@kompastv",fallback:"DOOrIxw5xOw"},
- cnn:{handle:"@CNNIndonesia",fallback:"PDDOkUq33Sw"}
+const CONFIG = {
+  tvone: { name:"TV One", handle:"@tvOneNews", fallback:"rQJoEpzKkNk" },
+  metro: { name:"Metro TV", handle:"@METROTV", fallback:null },
+  kompas: { name:"Kompas TV", handle:"@kompastv", fallback:null },
+  cnn: { name:"CNN Indonesia", handle:"@CNNIndonesia", fallback:null }
 };
 
-function setState(id,t){document.getElementById("s-"+id).textContent=t}
-function setVideo(id,v){document.getElementById(id).src="https://www.youtube.com/embed/"+v+"?autoplay=1&mute=1&playsinline=1&rel=0&origin="+encodeURIComponent(ORIGIN)}
-function fallback(){for(const [id,c] of Object.entries(CH)){setVideo(id,c.fallback);setState(id,"fallback")}}
+const ORIGIN = "https://nebengerspolsub.github.io";
+const CHECK_MS = 5 * 60 * 1000;
+let busy = false;
 
-async function getChannel(handle,key){
- const u="https://www.googleapis.com/youtube/v3/channels?part=id&forHandle="+encodeURIComponent(handle)+"&key="+key;
- const j=await fetch(u).then(r=>r.json());
- return j.items?.[0]?.id;
+function apiKey(){ return localStorage.getItem("yt_api_key") || ""; }
+
+function setState(id,text,type=""){
+  const el=document.getElementById("state-"+id);
+  el.textContent=text;
+  el.className="state "+type;
 }
-async function getLive(cid,key){
- const u="https://www.googleapis.com/youtube/v3/search?part=id&channelId="+cid+"&eventType=live&type=video&maxResults=1&key="+key;
- const j=await fetch(u).then(r=>r.json());
- return j.items?.[0]?.id?.videoId;
+function setOverlay(id,show,title,sub){
+  const o=document.getElementById("overlay-"+id);
+  if(title) o.querySelector("strong").textContent=title;
+  if(sub) o.querySelector("span").textContent=sub;
+  o.classList.toggle("hidden",!show);
 }
-async function checkAll(){
- const key=localStorage.getItem("ytkey");
- if(!key){fallback();return;}
- for(const [id,c] of Object.entries(CH)){
+function setStatus(t){ document.getElementById("statusbar").textContent=t; }
+
+function embed(id, videoId){
+  const url = "https://www.youtube.com/embed/"+encodeURIComponent(videoId)
+    +"?autoplay=1&mute=1&playsinline=1&rel=0&origin="+encodeURIComponent(ORIGIN);
+  const frame=document.getElementById("frame-"+id);
+  if(frame.dataset.video===videoId) return;
+  frame.dataset.video=videoId;
+  frame.src=url;
+}
+
+async function jsonFetch(url){
+  const r=await fetch(url);
+  const j=await r.json();
+  if(!r.ok || j.error) throw new Error(j.error?.message || ("HTTP "+r.status));
+  return j;
+}
+
+async function channelId(handle,key){
+  const url="https://www.googleapis.com/youtube/v3/channels?part=id&forHandle="+encodeURIComponent(handle)+"&key="+encodeURIComponent(key);
+  const j=await jsonFetch(url);
+  return j.items?.[0]?.id || null;
+}
+
+async function activeLive(cid,key){
+  const url="https://www.googleapis.com/youtube/v3/search?part=id,snippet&channelId="+encodeURIComponent(cid)
+    +"&eventType=live&type=video&order=date&maxResults=5&key="+encodeURIComponent(key);
+  const j=await jsonFetch(url);
+  return j.items?.[0]?.id?.videoId || null;
+}
+
+async function checkChannel(id,key){
+  const c=CONFIG[id];
+  setState(id,"mencari…","wait");
+  setOverlay(id,true,"Mencari livestream "+c.name+"…","Menghubungi YouTube Data API");
+
   try{
-   setState(id,"mencari…");
-   const cid=await getChannel(c.handle,key);
-   const vid=await getLive(cid,key);
-   if(vid){setVideo(id,vid);setState(id,"LIVE")}
-   else{setState(id,"tidak live")}
-  }catch(e){setState(id,"gagal")}
- }
+    const cid=await channelId(c.handle,key);
+    if(!cid) throw new Error("Channel tidak ditemukan: "+c.handle);
+    const vid=await activeLive(cid,key);
+
+    if(vid){
+      embed(id,vid);
+      setState(id,"LIVE","live");
+      setOverlay(id,false);
+      return {ok:true,videoId:vid};
+    }
+
+    // Hanya TV One yang diberi fallback manual untuk pengujian.
+    if(c.fallback){
+      embed(id,c.fallback);
+      setState(id,"fallback","wait");
+      setOverlay(id,false);
+      return {ok:false,fallback:true,videoId:c.fallback};
+    }
+
+    setState(id,"tidak live","wait");
+    setOverlay(id,true,"Tidak ada LIVE aktif","Aplikasi akan mengecek lagi otomatis");
+    return {ok:false};
+  }catch(err){
+    console.error(id,err);
+    setState(id,"API error","err");
+    setOverlay(id,true,"Gagal memeriksa "+c.name,err.message);
+    return {ok:false,error:err.message};
+  }
 }
-function toggleApi(){document.getElementById("panel").classList.toggle("show")}
+
+async function checkAll(){
+  if(busy) return;
+  const key=apiKey();
+  if(!key){
+    setStatus("API key belum diisi • klik ⚙ API");
+    for(const id of Object.keys(CONFIG)){
+      setState(id,"butuh API","wait");
+      setOverlay(id,true,"Masukkan YouTube API key","Klik tombol ⚙ API di kanan atas");
+    }
+    return;
+  }
+
+  busy=true;
+  setStatus("Mengecek livestream…");
+  let results=[];
+  for(const id of Object.keys(CONFIG)){
+    results.push(await checkChannel(id,key));
+  }
+  const now=new Date().toLocaleTimeString("id-ID",{hour:"2-digit",minute:"2-digit",second:"2-digit"});
+  const liveCount=results.filter(x=>x.ok).length;
+  setStatus("Terakhir dicek "+now+" • "+liveCount+"/4 LIVE • otomatis cek tiap 5 menit");
+  busy=false;
+}
+
+function openApi(){
+  document.getElementById("apiInput").value="";
+  document.getElementById("modalBackdrop").classList.add("show");
+}
+function closeApi(){document.getElementById("modalBackdrop").classList.remove("show")}
 function saveApi(){
- const k=document.getElementById("apikey").value.trim();
- if(k)localStorage.setItem("ytkey",k);
- document.getElementById("panel").classList.remove("show");
- checkAll();
+  const v=document.getElementById("apiInput").value.trim();
+  if(!v){alert("API key masih kosong.");return;}
+  localStorage.setItem("yt_api_key",v);
+  closeApi();
+  checkAll();
 }
-fallback();
+function clearApi(){
+  localStorage.removeItem("yt_api_key");
+  closeApi();
+  checkAll();
+}
+function fullscreenTile(id){
+  const el=document.getElementById(id);
+  if(el.requestFullscreen) el.requestFullscreen();
+}
+document.getElementById("apiBtn").onclick=openApi;
+document.getElementById("refreshBtn").onclick=checkAll;
+document.getElementById("modalBackdrop").addEventListener("click",e=>{
+  if(e.target.id==="modalBackdrop") closeApi();
+});
+
 checkAll();
-setInterval(checkAll,300000);
+setInterval(checkAll,CHECK_MS);
 </script>
 </body>
 </html>
