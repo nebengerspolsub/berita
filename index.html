@@ -22,7 +22,7 @@
 </head>
 <body>
 <header class="top">
-<div class="brand">🔴 BERITA MONITOR<small>4 CHANNEL • CHECK MANUAL • RETRY SAAT GAGAL</small></div>
+<div class="brand">🔴 BERITA<small>4 CHANNEL</small></div>
 <div class="actions"><button class="primary" onclick="checkAll()">↻ Cek 4 Live</button><button onclick="apiModal()">⚙ API</button></div>
 </header>
 <div id="status">Siap — klik Cek 4 Live.</div>
@@ -33,7 +33,7 @@
 <section class="tile" id="t-cnn"><div class="label">🔴 CNN Indonesia <span id="s-cnn" class="state">belum dicek</span></div><div class="tools"><button onclick="fs('t-cnn')">⛶</button></div><div id="p-cnn" class="player"></div><div id="c-cnn" class="cover"><div><strong>CNN Indonesia belum dicek</strong><span>Klik Cek 4 Live.</span></div></div><button class="retry" onclick="checkOne('cnn')">↻ Cek ulang</button></section>
 </main>
 
-<div id="modal" class="modal"><div class="box"><h2>YouTube Data API</h2><p>Masukkan API key. Key disimpan hanya di browser ini. Untuk GitHub Pages, restriction website sebaiknya memakai origin/domain GitHub Pages kamu.</p><input id="key" type="password" placeholder="AIzaSy..."><div class="modal-actions"><button onclick="closeModal()">Batal</button> <button onclick="clearKey()">Hapus</button> <button class="primary" onclick="saveKey()">Simpan</button></div></div></div>
+<div id="modal" class="modal"><div class="box"><h2>YouTube Data API</h2><p>Masukkan API key. Key disimpan hanya di browser ini.</p><input id="key" type="password" placeholder="AIzaSy..."><div class="modal-actions"><button onclick="closeModal()">Batal</button> <button onclick="clearKey()">Hapus</button> <button class="primary" onclick="saveKey()">Simpan</button></div></div></div>
 
 <script>
 /*
